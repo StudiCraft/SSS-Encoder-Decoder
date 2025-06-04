@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Cipher App</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+        }
+        button {
+            display: inline-block;
+            background: #5cb85c;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background 0.3s ease;
+        }
+         button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background: #4cae4c;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .language-switcher {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .language-switcher button {
+            background: none;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 1em;
+            color: #333; /* Default text color */
+            margin-left: 5px;
+        }
+        .language-switcher button:hover {
+            text-decoration: underline;
+        }
+         .language-switcher button.active {
+             font-weight: bold;
+             text-decoration: underline;
+             color: #007bff; /* Highlight active language */
+         }
+         .language-switcher button img {
+             vertical-align: middle;
+             margin-right: 5px;
+             width: 20px; /* Adjust size as needed */
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+         <div class="language-switcher">
+             <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">🇺🇸 English</button>
+             <button class="lang-btn" data-lang="fr" onclick="setLanguage('fr')">🇫🇷 Français</button>
+         </div>
+
+        <h1 id="appTitle">Custom Cipher Encoder/Decoder</h1>
+        <p id="appSubtitle">Using the "Scramble-Shift-Symbol" technique.<br> Accented letters are converted to basic ones during encoding.</p>
+
+        <div class="section">
+            <h2 id="encodeSectionTitle">Encode Message</h2>
+            <label for="messageToEncode" id="encodeInputLabel">Enter message to encode (Accents will be removed):</label><br>
+            <textarea id="messageToEncode" placeholder="Enter your message here..."></textarea><br>
+            <button id="encodeButton" onclick="encodeMessage()">Encode</button>
+            <br><br>
+            <label for="encodedOutput" id="encodedOutputLabel">Encoded message:</label><br>
+            <textarea id="encodedOutput" readonly placeholder="Encoded output will appear here..."></textarea>
+        </div>
+
+        <div class="section">
+            <h2 id="decodeSectionTitle">Decode Message</h2>
+            <label for="messageToDecode" id="decodeInputLabel">Enter message to decode:</label><br>
+            <textarea id="messageToDecode" placeholder="Enter the encoded message here..."></textarea><br>
+            <button id="decodeButton" onclick="decodeMessage()">Decode</button>
+            <br><br>
+            <label for="decodedOutput" id="decodedOutputLabel">Decoded message:</label><br>
+            <textarea id="decodedOutput" readonly placeholder="Decoded output will appear here..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Define text strings for each language
+        const translations = {
+            en: {
+                appTitle: "Custom Cipher Encoder/Decoder",
+                appSubtitle: 'Using the "Scramble-Shift-Symbol" technique.<br> Accented letters are converted to basic ones during encoding.',
+                encodeSectionTitle: "Encode Message",
+                encodeInputLabel: "Enter message to encode (Accents will be removed):",
+                encodePlaceholder: "Enter your message here...",
+                encodeButton: "Encode",
+                encodedOutputLabel: "Encoded message:",
+                encodedPlaceholder: "Encoded output will appear here...",
+                decodeSectionTitle: "Decode Message",
+                decodeInputLabel: "Enter message to decode:",
+                decodePlaceholder: "Enter the encoded message here...",
+                decodeButton: "Decode",
+                decodedOutputLabel: "Decoded message:",
+                decodedPlaceholder: "Decoded output will appear here..."
+            },
+            fr: {
+                appTitle: "Encodeur/Décodeur de Chiffrement Personnalisé",
+                appSubtitle: 'Utilise la technique "Mélanger-Décaler-Symboliser".<br> Les lettres accentuées sont converties en lettres de base pendant l\'encodage.',
+                encodeSectionTitle: "Encoder le Message",
+                encodeInputLabel: "Entrez le message à encoder (Les accents seront supprimés) :",
+                encodePlaceholder: "Entrez votre message ici...",
+                encodeButton: "Encoder",
+                encodedOutputLabel: "Message encodé :",
+                encodedPlaceholder: "Le résultat encodé apparaîtra ici...",
+                decodeSectionTitle: "Décoder le Message",
+                decodeInputLabel: "Entrez le message à décoder :",
+                decodePlaceholder: "Entrez le message encodé ici...",
+                decodeButton: "Décoder",
+                decodedOutputLabel: "Message décodé :",
+                decodedPlaceholder: "Le résultat décodé apparaîtra ici..."
+            }
+        };
+
+        // Function to update the UI text based on the selected language
+        function setLanguage(lang) {
+            const textElements = {
+                appTitle: document.getElementById('appTitle'),
+                appSubtitle: document.getElementById('appSubtitle'),
+                encodeSectionTitle: document.getElementById('encodeSectionTitle'),
+                encodeInputLabel: document.getElementById('encodeInputLabel'),
+                messageToEncode: document.getElementById('messageToEncode'), // Use placeholder for textarea
+                encodeButton: document.getElementById('encodeButton'),
+                encodedOutputLabel: document.getElementById('encodedOutputLabel'),
+                encodedOutput: document.getElementById('encodedOutput'), // Use placeholder for textarea
+                decodeSectionTitle: document.getElementById('decodeSectionTitle'),
+                decodeInputLabel: document.getElementById('decodeInputLabel'),
+                messageToDecode: document.getElementById('messageToDecode'), // Use placeholder for textarea
+                decodeButton: document.getElementById('decodeButton'),
+                decodedOutputLabel: document.getElementById('decodedOutputLabel'),
+                decodedOutput: document.getElementById('decodedOutput') // Use placeholder for textarea
+            };
+
+            // Update text content and placeholders
+            for (const id in textElements) {
+                const element = textElements[id];
+                if (element) {
+                    if (id.includes('Placeholder')) { // Handle placeholders for textareas
+                         // Note: This mapping isn't perfect with the current structure,
+                         // update the direct element placeholders below
+                    } else if (element.tagName === 'TEXTAREA') {
+                         // Handled below via direct placeholder updates
+                    }
+                    else if (id === 'appSubtitle') {
+                        element.innerHTML = translations[lang][id]; // Use innerHTML for line breaks
+                    }
+                    else {
+                         element.textContent = translations[lang][id];
+                    }
+                }
+            }
+
+            // Manually update textarea placeholders
+             document.getElementById('messageToEncode').placeholder = translations[lang].encodePlaceholder;
+             document.getElementById('encodedOutput').placeholder = translations[lang].encodedPlaceholder;
+             document.getElementById('messageToDecode').placeholder = translations[lang].decodePlaceholder;
+             document.getElementById('decodedOutput').placeholder = translations[lang].decodedPlaceholder;
+
+
+            // Update active button state
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                if (btn.getAttribute('data-lang') === lang) {
+                    btn.classList.add('active');
+                    btn.disabled = true; // Disable the currently active button
+                } else {
+                    btn.classList.remove('active');
+                     btn.disabled = false; // Enable other buttons
+                }
+            });
+
+            // Store the current language preference (optional, but good practice)
+            // localStorage.setItem('preferredLang', lang);
+        }
+
+        // --- Encoding Logic (Same as before) ---
+        function encode(text) {
+            // Step 1: Lowercase and Cleanse
+            text = text.toLowerCase();
+            text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            text = text.replace(/[^a-z ]/g, '');
+
+            let shiftedText = "";
+            // Step 2: Character Shift (+4)
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === ' ') {
+                    shiftedText += ' ';
+                } else {
+                    let charCode = char.charCodeAt(0);
+                    let shiftedCode = charCode + 4;
+                    if (shiftedCode > 'z'.charCodeAt(0)) {
+                        shiftedCode = shiftedCode - 26;
+                    }
+                    shiftedText += String.fromCharCode(shiftedCode);
+                }
+            }
+
+            // Step 3: Vowel Substitution
+            let symbolizedText = shiftedText
+                .replace(/a/g, '&')
+                .replace(/e/g, '%')
+                .replace(/i/g, '$')
+                .replace(/o/g, '#')
+                .replace(/u/g, '^');
+
+            // Step 4: Reverse Entire String
+            let reversedText = symbolizedText.split('').reverse().join('');
+
+            return reversedText;
+        }
+
+        // --- Decoding Logic (Same as before) ---
+        function decode(encodedText) {
+            let reversedBackText = encodedText.split('').reverse().join('');
+
+            let desymbolizedText = reversedBackText
+                .replace(/&/g, 'a')
+                .replace(/%/g, 'e')
+                .replace(/\$/g, 'i')
+                .replace(/#/g, 'o')
+                .replace(/\^/g, 'u');
+
+            let originalText = "";
+             for (let i = 0; i < desymbolizedText.length; i++) {
+                let char = desymbolizedText[i];
+                if (char === ' ') {
+                    originalText += ' ';
+                } else {
+                    let charCode = char.charCodeAt(0);
+                    let shiftedCode = charCode - 4;
+                    if (shiftedCode < 'a'.charCodeAt(0)) {
+                        shiftedCode = shiftedCode + 26;
+                    }
+                     originalText += String.fromCharCode(shiftedCode);
+                }
+            }
+            return originalText;
+        }
+
+        // --- UI Interaction ---
+        function encodeMessage() {
+            const message = document.getElementById('messageToEncode').value;
+            const encoded = encode(message);
+            document.getElementById('encodedOutput').value = encoded;
+        }
+
+        function decodeMessage() {
+            const encodedMessage = document.getElementById('messageToDecode').value;
+            const decoded = decode(encodedMessage);
+            document.getElementById('decodedOutput').value = decoded;
+        }
+
+        // Set default language on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Optional: Check localStorage for saved language preference
+            // const savedLang = localStorage.getItem('preferredLang') || 'en';
+            setLanguage('en'); // Default to English
+        });
+
+    </script>
+</body>
+</html>
