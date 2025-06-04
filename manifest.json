@@ -1,0 +1,12 @@
+{
+  "name": "SSS Encoder/Decoder",
+  "short_name": "SSS (En/De)coder",
+  "description": "Encode and Decode with my own technique",
+  "start_url": "./SSS-Encoder-Decoder/index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#0d6efd",
+  "icons": [
+    
+  ]
+}
