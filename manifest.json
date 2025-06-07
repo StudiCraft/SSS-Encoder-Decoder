@@ -1,4 +1,14 @@
 {
+  "_metadata_comments": {
+    "name": "The full name of the web application, displayed to users (e.g., in app stores, installation prompts).",
+    "short_name": "A shorter version of the application's name, used where space is limited (e.g., under app icons on a home screen).",
+    "description": "A brief description of the application's purpose and functionality.",
+    "start_url": "The URL that loads when the application is launched from an installed icon. It's relative to the manifest file's location.",
+    "display": "Defines the preferred display mode for the application. 'standalone' opens the app in its own window, without browser UI.",
+    "background_color": "Specifies the background color of the application, used by the browser during startup or for the splash screen.",
+    "theme_color": "Defines the default theme color for the application, which can affect how the OS displays the site (e.g., window title bar color).",
+    "icons": "An array of image objects that serve as application icons for various contexts (e.g., home screen, task switcher). Each object should specify 'src', 'sizes', and 'type'. This array is currently empty and should be populated with actual icon resources."
+  },
   "name": "SSS Encoder/Decoder",
   "short_name": "SSS (En/De)coder",
   "description": "Encode and Decode with my own technique",
