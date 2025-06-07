@@ -120,7 +120,13 @@
     </div>
 
     <script>
-        // Define text strings for each language
+        /**
+         * @type {Object.<string, Object.<string, string>>}
+         * @description Stores UI text translations for different languages.
+         * The outer keys are language codes (e.g., "en", "fr").
+         * The inner objects map element IDs or keys to their translated string values.
+         * Example: translations.en.appTitle = "Custom Cipher Encoder/Decoder";
+         */
         const translations = {
             en: {
                 appTitle: "Custom Cipher Encoder/Decoder",
@@ -156,7 +162,19 @@
             }
         };
 
-        // Function to update the UI text based on the selected language
+        /**
+         * Sets the user interface language.
+         * Updates text content of various HTML elements based on the selected language.
+         * Manages the active state and disabled status of language selection buttons.
+         *
+         * @param {string} lang - The language code to set (e.g., "en", "fr").
+         *                        This code must exist as a key in the `translations` object.
+         * @sideEffects Modifies the `textContent` or `innerHTML` of several DOM elements.
+         *              Modifies the `placeholder` attribute of textarea DOM elements.
+         *              Adds/Removes the 'active' class from language buttons.
+         *              Disables the button for the currently active language and enables others.
+         *              Potentially stores the selected language in `localStorage` (currently commented out).
+         */
         function setLanguage(lang) {
             const textElements = {
                 appTitle: document.getElementById('appTitle'),
@@ -216,7 +234,19 @@
             // localStorage.setItem('preferredLang', lang);
         }
 
-        // --- Encoding Logic (Same as before) ---
+        /**
+         * Encodes a given text string using a custom "Scramble-Shift-Symbol" like algorithm.
+         * The encoding steps are:
+         * 1. Convert text to lowercase.
+         * 2. Normalize accented characters to their basic Latin equivalents (e.g., "é" to "e").
+         * 3. Remove any characters that are not lowercase letters (a-z) or spaces.
+         * 4. Shift each letter character by +4 positions in the alphabet (wrapping around from z to a). Spaces remain unchanged.
+         * 5. Substitute specific vowels with symbols: 'a' -> '&', 'e' -> '%', 'i' -> '$', 'o' -> '#', 'u' -> '^'.
+         * 6. Reverse the entire resulting string.
+         *
+         * @param {string} text - The plain text string to encode.
+         * @returns {string} The encoded string.
+         */
         function encode(text) {
             // Step 1: Lowercase and Cleanse
             text = text.toLowerCase();
@@ -253,7 +283,16 @@
             return reversedText;
         }
 
-        // --- Decoding Logic (Same as before) ---
+        /**
+         * Decodes a text string that was previously encoded by the `encode` function.
+         * The decoding steps are the reverse of the encoding process:
+         * 1. Reverse the entire encoded string.
+         * 2. Substitute symbols back to their original vowels: '&' -> 'a', '%' -> 'e', '$' -> 'i', '#' -> 'o', '^' -> 'u'.
+         * 3. Shift each letter character by -4 positions in the alphabet (wrapping around from a to z). Spaces remain unchanged.
+         *
+         * @param {string} encodedText - The encoded string to decode.
+         * @returns {string} The original, decoded plain text string.
+         */
         function decode(encodedText) {
             let reversedBackText = encodedText.split('').reverse().join('');
 
@@ -281,20 +320,40 @@
             return originalText;
         }
 
-        // --- UI Interaction ---
+        /**
+         * @function encodeMessage
+         * @description Handles the UI interaction for encoding a message.
+         * Retrieves text from the input textarea ("messageToEncode").
+         * Calls the `encode()` function to process the text.
+         * Displays the encoded result in the output textarea ("encodedOutput").
+         * @event_handler This function is typically called by an onclick event on an "Encode" button.
+         */
         function encodeMessage() {
             const message = document.getElementById('messageToEncode').value;
             const encoded = encode(message);
             document.getElementById('encodedOutput').value = encoded;
         }
 
+        /**
+         * @function decodeMessage
+         * @description Handles the UI interaction for decoding a message.
+         * Retrieves text from the input textarea ("messageToDecode").
+         * Calls the `decode()` function to process the text.
+         * Displays the decoded result in the output textarea ("decodedOutput").
+         * @event_handler This function is typically called by an onclick event on a "Decode" button.
+         */
         function decodeMessage() {
             const encodedMessage = document.getElementById('messageToDecode').value;
             const decoded = decode(encodedMessage);
             document.getElementById('decodedOutput').value = decoded;
         }
 
-        // Set default language on page load
+        /**
+         * @event DOMContentLoaded
+         * @description Event listener that fires when the initial HTML document has been completely loaded and parsed.
+         * Sets the default language of the application to English ('en') by calling `setLanguage('en')`.
+         * (Note: Includes commented-out code for potentially retrieving a saved language preference from `localStorage`).
+         */
         document.addEventListener('DOMContentLoaded', () => {
             // Optional: Check localStorage for saved language preference
             // const savedLang = localStorage.getItem('preferredLang') || 'en';
